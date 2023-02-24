@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="color"]::-webkit-color-swatch {
+  border-color: black;
+  border-radius: 50%;
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  border-color: black;
+  border-radius: 50%;
+  padding: 0;
+}
