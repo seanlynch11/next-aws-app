@@ -15,9 +15,9 @@ type CellProps = {
 function Cell({ x, y, color, setFocus }: CellProps) {
   return (
     <div
-      tabIndex={y + 1}
+      tabIndex={x + 1}
       onClick={() => setFocus({ x, y })}
-      className="p-2 border border-transparent hover:border-black focus:border-black focus:border-dashed"
+      className="border border-transparent p-2 hover:border-black focus:border-dashed focus:border-black"
       style={{ backgroundColor: color }}
     ></div>
   );
@@ -32,11 +32,16 @@ function Grid({
 }) {
   return (
     <>
-      <div className="grid grid-flow-row overflow-auto">
-        {grid.map((row, rowNum) => (
-          <div key={rowNum} className="grid grid-flow-col">
-            {row.map((cell) => (
-              <Cell key={cell.x} {...cell} setFocus={setFocus}></Cell>
+      <div className="flex flex-row overflow-auto">
+        {grid.map((col, colNum) => (
+          <div
+            key={colNum}
+            className="flex flex-col border-black first:ml-auto first:border-l-8 last:mr-auto last:border-r-8"
+          >
+            {col.map((cell) => (
+              <div className=" border-black first:border-t-4 last:border-b-8">
+                <Cell key={cell.x} {...cell} setFocus={setFocus}></Cell>
+              </div>
             ))}
           </div>
         ))}
@@ -88,13 +93,13 @@ export default function Canvas() {
 
   return (
     <>
-      <div className="bg-black h-screen">
-        <div className="flex sticky top-0 bg-slate-800 p-2">
-          <div className="flex p-2 bg-slate-200 rounded-full ">
+      <div className="h-screen overflow-auto bg-gradient-to-r from-pink-600 to-violet-600">
+        <div className="sticky top-0 flex border-b-4 border-black bg-gradient-to-b from-cyan-400 to-cyan-500 p-3">
+          <div className="flex rounded-full bg-slate-200 p-2 shadow-md shadow-cyan-900">
             <input
               onChange={(e) => setColor(e.target.value)}
               type="color"
-              className="h-10 w-10 rounded-full cursor-pointer"
+              className="h-10 w-10 cursor-pointer rounded-full"
             ></input>
             {focusedCell ? (
               <button className="px-2" onClick={paintCell}>
@@ -103,9 +108,7 @@ export default function Canvas() {
             ) : undefined}
           </div>
         </div>
-        <div className="">
-          <Grid grid={grid} setFocus={setFocus}></Grid>
-        </div>
+        <Grid grid={grid} setFocus={setFocus}></Grid>
       </div>
     </>
   );
