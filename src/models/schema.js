@@ -14,14 +14,14 @@ export const schema = {
                     "name": "x",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "y": {
                     "name": "y",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "color": {
@@ -77,5 +77,5 @@ export const schema = {
     "enums": {},
     "nonModels": {},
     "codegenVersion": "3.3.6",
-    "version": "c464345ea81a95e91e8f78b23826b6e5"
+    "version": "c9de123cea7153ca940322381f23b561"
 };

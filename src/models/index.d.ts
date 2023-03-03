@@ -12,8 +12,8 @@ type EagerCell = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly x?: number | null;
-  readonly y?: number | null;
+  readonly x: number;
+  readonly y: number;
   readonly color?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -25,8 +25,8 @@ type LazyCell = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly x?: number | null;
-  readonly y?: number | null;
+  readonly x: number;
+  readonly y: number;
   readonly color?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
