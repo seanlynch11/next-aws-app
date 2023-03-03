@@ -1,0 +1,20 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-amplify080b95c766b74-staging-201924-authRole",
+      "UnauthRoleArn": "arn:aws:iam::198663696799:role/amplify-amplify080b95c766b74-staging-201924-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::198663696799:role/amplify-amplify080b95c766b74-staging-201924-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-amplify080b95c766b74-staging-201924-deployment",
+      "UnauthRoleName": "amplify-amplify080b95c766b74-staging-201924-unauthRole",
+      "StackName": "amplify-amplify080b95c766b74-staging-201924",
+      "StackId": "arn:aws:cloudformation:us-east-1:198663696799:stack/amplify-amplify080b95c766b74-staging-201924/5c105140-b86e-11ed-b9cf-120c6f66e13d",
+      "AmplifyAppId": "dbfxlhgi65exw"
+    },
+    "categories": {
+      "api": {
+        "nextawsapp": {}
+      }
+    }
+  }
+}

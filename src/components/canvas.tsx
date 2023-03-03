@@ -1,35 +1,37 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { API, graphqlOperation } from "aws-amplify";
+import { GraphQLQuery } from "@aws-amplify/api";
+
+import { listCells } from "@/graphql/queries";
+import {
+  Cell,
+  ListCellsQuery,
+  CreateCellMutation,
+  UpdateCellMutation,
+} from "@/API";
+import { createCell, updateCell } from "@/graphql/mutations";
 
 const CANVAS_X = 64;
 const CANVAS_Y = 64;
 
-type CellProps = {
-  x: number;
-  y: number;
-  color: string;
+type CellProps = Cell & {
   setFocus: Function;
 };
 
-function Cell({ x, y, color, setFocus }: CellProps) {
+function CellElement({ x, y, color, setFocus }: CellProps) {
   return (
     <div
       tabIndex={x + 1}
       onClick={() => setFocus({ x, y })}
-      className="border border-transparent p-2 hover:border-black focus:border-dashed focus:border-black"
+      className="border border-transparent p-1 hover:border-black focus:border-dashed focus:border-black"
       style={{ backgroundColor: color }}
     ></div>
   );
 }
 
-function Grid({
-  grid,
-  setFocus,
-}: {
-  grid: { x: number; y: number; color: string }[][];
-  setFocus: Function;
-}) {
+function Grid({ grid, setFocus }: { grid: Cell[][]; setFocus: Function }) {
   return (
     <>
       <div className="flex flex-row overflow-auto">
@@ -39,8 +41,11 @@ function Grid({
             className="flex flex-col border-black first:ml-auto first:border-l-8 last:mr-auto last:border-r-8"
           >
             {col.map((cell) => (
-              <div className=" border-black first:border-t-4 last:border-b-8">
-                <Cell key={cell.x} {...cell} setFocus={setFocus}></Cell>
+              <div
+                key={cell.x}
+                className=" border-black first:border-t-4 last:border-b-8"
+              >
+                <CellElement {...cell} setFocus={setFocus}></CellElement>
               </div>
             ))}
           </div>
@@ -61,32 +66,59 @@ export default function Canvas() {
       .map((_, y) =>
         Array(CANVAS_X)
           .fill(0)
-          .map((_, x) => ({ x, y, color: "#FFFFFF" }))
+          .map((_, x) => ({ x, y, color: "#FFFFFF" } as Cell))
       )
   );
+
+  const fetchCells = async () => {
+    const cellsResult = await API.graphql<GraphQLQuery<ListCellsQuery>>(
+      graphqlOperation(listCells)
+    );
+    cellsResult.data?.listCells?.items.forEach((item) => {
+      if (item) {
+        grid[item.y][item.x] = item;
+      }
+    });
+    setGrid([...grid]);
+  };
+
+  useEffect(() => {
+    fetchCells();
+  }, []);
 
   const setColor = (color: string) => {
     pickedColor.current = color;
   };
 
   const setFocus = ({ x, y }: { x: number; y: number }) => {
-    console.log(x, y);
     setFocusedCell({ x, y });
   };
 
-  const paintCell = () => {
+  const paintCell = async () => {
     if (focusedCell) {
-      setGrid((grid) =>
-        grid.map((row, rowY) =>
-          rowY == focusedCell.y
-            ? row.map((cell, cellX) =>
-                cellX == focusedCell.x
-                  ? { ...cell, color: pickedColor.current }
-                  : cell
-              )
-            : row
-        )
-      );
+      if (!grid[focusedCell.y][focusedCell.x].id) {
+        const newCell = await API.graphql<GraphQLQuery<CreateCellMutation>>(
+          graphqlOperation(createCell, {
+            input: {
+              x: focusedCell.x,
+              y: focusedCell.y,
+              color: pickedColor.current,
+            },
+          })
+        );
+      } else {
+        const updatedCell = await API.graphql<GraphQLQuery<UpdateCellMutation>>(
+          graphqlOperation(updateCell, {
+            input: {
+              id: grid[focusedCell.y][focusedCell.x].id,
+              color: pickedColor.current,
+              _version: grid[focusedCell.y][focusedCell.x]._version,
+            },
+          })
+        );
+      }
+
+      fetchCells();
       setFocusedCell(undefined);
     }
   };
