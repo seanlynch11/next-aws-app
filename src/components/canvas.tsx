@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { API, graphqlOperation } from "aws-amplify";
 import { GraphQLQuery } from "@aws-amplify/api";
+import { GraphQLSubscription } from "@aws-amplify/api";
+import * as subscriptions from "../graphql/subscriptions";
+import { OnCreateCellSubscription, OnUpdateCellSubscription } from "../API";
 
 import { listCells } from "@/graphql/queries";
 import {
@@ -89,6 +92,38 @@ export default function Canvas() {
     fetchCells();
   }, []);
 
+  useEffect(() => {
+    const createSub = API.graphql<
+      GraphQLSubscription<OnCreateCellSubscription>
+    >(graphqlOperation(subscriptions.onCreateCell)).subscribe({
+      next: ({ value }) => {
+        const cell = value?.data?.onCreateCell;
+        if (cell) {
+          grid[cell.y][cell.x] = cell;
+        }
+        setGrid([...grid]);
+      },
+      error: (error) => console.warn(error),
+    });
+    const updateSub = API.graphql<
+      GraphQLSubscription<OnUpdateCellSubscription>
+    >(graphqlOperation(subscriptions.onUpdateCell)).subscribe({
+      next: ({ value }) => {
+        const cell = value?.data?.onUpdateCell;
+        if (cell) {
+          grid[cell.y][cell.x] = cell;
+        }
+        setGrid([...grid]);
+      },
+      error: (error) => console.warn(error),
+    });
+
+    return () => {
+      createSub.unsubscribe();
+      updateSub.unsubscribe();
+    };
+  }, []);
+
   const setColor = (color: string) => {
     pickedColor.current = color;
   };
@@ -120,8 +155,6 @@ export default function Canvas() {
           })
         );
       }
-
-      fetchCells();
 
       setFocusedCell(undefined);
     }
