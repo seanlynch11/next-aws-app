@@ -11,7 +11,7 @@ export default function Home() {
           content="Created with NextJS 13, AWS Amplify/DynamoDB/GraphQL"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon-512x512.png" />
       </Head>
       <Canvas></Canvas>
     </>
