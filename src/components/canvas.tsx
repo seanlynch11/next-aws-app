@@ -26,7 +26,7 @@ function CellElement({ x, y, color, setFocus }: CellProps) {
       tabIndex={x + 1}
       onClick={() => setFocus({ x, y })}
       className="border border-transparent p-1 hover:border-black focus:border-dashed focus:border-black"
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor: color as string }}
     ></div>
   );
 }
