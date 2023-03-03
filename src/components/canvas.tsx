@@ -16,11 +16,14 @@ import { createCell, updateCell } from "@/graphql/mutations";
 const CANVAS_X = 64;
 const CANVAS_Y = 64;
 
-type CellProps = Cell & {
+function CellElement({
+  x,
+  y,
+  color,
+  setFocus,
+}: Cell & {
   setFocus: Function;
-};
-
-function CellElement({ x, y, color, setFocus }: CellProps) {
+}) {
   return (
     <div
       tabIndex={x + 1}
