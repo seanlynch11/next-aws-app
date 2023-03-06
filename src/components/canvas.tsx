@@ -29,7 +29,7 @@ function CellElement({
 }) {
   return (
     <div
-      tabIndex={x + 1}
+      tabIndex={y + 1}
       onClick={() => setFocus({ x, y })}
       className="border border-transparent p-1 hover:border-black focus:border-dashed focus:border-black"
       style={{ backgroundColor: color as string }}
@@ -41,14 +41,14 @@ function Grid({ grid, setFocus }: { grid: Cell[][]; setFocus: Function }) {
   return (
     <>
       <div className="flex flex-row overflow-auto">
-        {grid.map((col, colNum) => (
+        {grid.map((col, x) => (
           <div
-            key={colNum}
+            key={x}
             className="flex flex-col border-black first:ml-auto first:border-l-8 last:mr-auto last:border-r-8"
           >
-            {col.map((cell) => (
+            {col.map((cell, y) => (
               <div
-                key={cell.x}
+                key={y}
                 className=" border-black first:border-t-4 last:border-b-8"
               >
                 <CellElement {...cell} setFocus={setFocus}></CellElement>
@@ -67,12 +67,12 @@ export default function Canvas() {
     undefined as unknown as { x: number; y: number } | undefined
   );
   const [grid, setGrid] = useState(
-    Array(CANVAS_Y)
+    Array(CANVAS_X)
       .fill(0)
-      .map((_, y) =>
-        Array(CANVAS_X)
+      .map((_, x) =>
+        Array(CANVAS_Y)
           .fill(0)
-          .map((_, x) => ({ x, y, color: "#FFFFFF" } as Cell))
+          .map((_, y) => ({ x, y, color: "#FFFFFF" } as Cell))
       )
   );
 
@@ -82,7 +82,7 @@ export default function Canvas() {
     );
     cellsResult.data?.listCells?.items.forEach((item) => {
       if (item) {
-        grid[item.y][item.x] = item;
+        grid[item.x][item.y] = item;
       }
     });
     setGrid([...grid]);
@@ -99,9 +99,8 @@ export default function Canvas() {
       next: ({ value }) => {
         const cell = value?.data?.onCreateCell;
         if (cell) {
-          grid[cell.y][cell.x] = cell;
+          changeCell(cell);
         }
-        setGrid([...grid]);
       },
       error: (error) => console.warn(error),
     });
@@ -111,7 +110,7 @@ export default function Canvas() {
       next: ({ value }) => {
         const cell = value?.data?.onUpdateCell;
         if (cell) {
-          grid[cell.y][cell.x] = cell;
+          grid[cell.x][cell.y] = cell;
         }
         setGrid([...grid]);
       },
@@ -132,31 +131,37 @@ export default function Canvas() {
     setFocusedCell({ x, y });
   };
 
+  const changeCell = (cell: Cell) => {
+    grid[cell.x][cell.y] = cell;
+    setGrid([...grid]);
+  };
+
   const paintCell = async () => {
     if (focusedCell) {
-      if (!grid[focusedCell.y][focusedCell.x].id) {
+      let cell = {
+        x: focusedCell.x,
+        y: focusedCell.y,
+        color: pickedColor.current,
+      } as Cell;
+      setFocusedCell(undefined);
+      changeCell(cell);
+      if (!grid[focusedCell.x][focusedCell.y].id) {
         const newCell = await API.graphql<GraphQLQuery<CreateCellMutation>>(
           graphqlOperation(createCell, {
-            input: {
-              x: focusedCell.x,
-              y: focusedCell.y,
-              color: pickedColor.current,
-            },
+            input: cell,
           })
         );
       } else {
         const updatedCell = await API.graphql<GraphQLQuery<UpdateCellMutation>>(
           graphqlOperation(updateCell, {
             input: {
-              id: grid[focusedCell.y][focusedCell.x].id,
+              id: grid[focusedCell.x][focusedCell.y].id,
               color: pickedColor.current,
-              _version: grid[focusedCell.y][focusedCell.x]._version,
+              _version: grid[focusedCell.x][focusedCell.y]._version,
             },
           })
         );
       }
-
-      setFocusedCell(undefined);
     }
   };
 
